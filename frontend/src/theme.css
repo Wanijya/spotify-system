@@ -1,0 +1,128 @@
+/* ============================================
+   SPOTIFY DESIGN SYSTEM — CSS Variables
+   ============================================ */
+
+:root {
+    /* ── Brand Colors ── */
+    --color-primary: #1DB954;
+    --color-primary-hover: #1ED760;
+    --color-primary-active: #169C46;
+    --color-primary-muted: rgba(29, 185, 84, 0.15);
+
+    /* ── Background Colors ── */
+    --bg-base: #121212;
+    --bg-elevated: #181818;
+    --bg-surface: #242424;
+    --bg-highlight: #2A2A2A;
+    --bg-card: #1A1A1A;
+    --bg-input: #333333;
+    --bg-overlay: rgba(0, 0, 0, 0.7);
+
+    /* ── Text Colors ── */
+    --text-primary: #FFFFFF;
+    --text-secondary: #B3B3B3;
+    --text-muted: #727272;
+    --text-disabled: #535353;
+    --text-link: #1DB954;
+    --text-link-hover: #1ED760;
+
+    /* ── Border Colors ── */
+    --border-default: #333333;
+    --border-light: #404040;
+    --border-focus: #1DB954;
+    --border-error: #F15E6C;
+
+    /* ── Status / Feedback Colors ── */
+    --color-success: #1DB954;
+    --color-error: #F15E6C;
+    --color-warning: #FFA42B;
+    --color-info: #4CB3FF;
+
+    /* ── Typography ── */
+    --font-family: 'Inter', 'Segoe UI', Roboto, -apple-system, sans-serif;
+    --font-family-mono: 'Fira Code', 'Courier New', monospace;
+
+    --font-size-xs: 0.75rem;
+    /* 12px */
+    --font-size-sm: 0.875rem;
+    /* 14px */
+    --font-size-base: 1rem;
+    /* 16px */
+    --font-size-md: 1.125rem;
+    /* 18px */
+    --font-size-lg: 1.25rem;
+    /* 20px */
+    --font-size-xl: 1.5rem;
+    /* 24px */
+    --font-size-2xl: 2rem;
+    /* 32px */
+    --font-size-3xl: 2.5rem;
+    /* 40px */
+    --font-size-4xl: 3rem;
+    /* 48px */
+
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --font-weight-extrabold: 800;
+
+    --line-height-tight: 1.2;
+    --line-height-normal: 1.5;
+    --line-height-relaxed: 1.75;
+
+    --letter-spacing-tight: -0.02em;
+    --letter-spacing-normal: 0;
+    --letter-spacing-wide: 0.05em;
+    --letter-spacing-uppercase: 0.1em;
+
+    /* ── Spacing ── */
+    --space-xs: 0.25rem;
+    /* 4px  */
+    --space-sm: 0.5rem;
+    /* 8px  */
+    --space-md: 1rem;
+    /* 16px */
+    --space-lg: 1.5rem;
+    /* 24px */
+    --space-xl: 2rem;
+    /* 32px */
+    --space-2xl: 3rem;
+    /* 48px */
+    --space-3xl: 4rem;
+    /* 64px */
+
+    /* ── Border Radius ── */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-full: 9999px;
+
+    /* ── Shadows ── */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
+    --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.7);
+    --shadow-glow: 0 0 20px rgba(29, 185, 84, 0.3);
+
+    /* ── Transitions ── */
+    --transition-fast: 150ms ease;
+    --transition-normal: 250ms ease;
+    --transition-slow: 400ms ease;
+    --transition-spring: 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    /* ── Z-Index layers ── */
+    --z-dropdown: 100;
+    --z-sticky: 200;
+    --z-modal-backdrop: 300;
+    --z-modal: 400;
+    --z-toast: 500;
+    --z-tooltip: 600;
+
+    /* ── Layout ── */
+    --sidebar-width: 280px;
+    --player-height: 90px;
+    --header-height: 64px;
+    --container-max-width: 1200px;
+}

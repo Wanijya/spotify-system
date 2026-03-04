@@ -12,6 +12,8 @@ router.post(
   authController.register,
 );
 
+router.post("/login", validationRules.loginUserValidationRules, authController.login);
+
 router.get(
   "/google",
   passport.authenticate("google", { scope: ["profile", "email"] }),
