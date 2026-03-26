@@ -7,6 +7,6 @@ const app = express();
 
 app.use(express.json());
 app.use(cookieParser());
-app.use("/music", musicRoutes);
+app.use("/api/music", musicRoutes);
 
 export default app;

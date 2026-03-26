@@ -9,6 +9,7 @@ export async function register(req, res) {
     fullName: { firstName, lastName },
     email,
     password,
+    role = "user",
   } = req.body;
   const isUserAlreadyExists = await userModel.findOne({ email });
 
@@ -23,9 +24,10 @@ export async function register(req, res) {
       firstName,
       lastName,
     },
+    role,
   });
   const token = jwt.sign(
-    { id: user._id, role: user.role },
+    { id: user._id, role: user.role, fullName: user.fullName },
     _config.JWT_SECRET,
     {
       expiresIn: "2d",
@@ -63,6 +65,7 @@ export async function googleAuthCallback(req, res) {
       {
         id: isUserAlreadyExists._id,
         role: isUserAlreadyExists.role,
+        fullName: isUserAlreadyExists.fullName,
       },
       _config.JWT_SECRET,
       {
@@ -85,6 +88,7 @@ export async function googleAuthCallback(req, res) {
     {
       id: newUser._id,
       role: newUser.role,
+      fullName: newUser.fullName,
     },
     _config.JWT_SECRET,
     {
@@ -108,7 +112,7 @@ export async function login(req, res) {
     return res.status(400).json({ message: "Invalid email or password" });
   }
   const token = jwt.sign(
-    { id: user._id, role: user.role },
+    { id: user._id, role: user.role, fullName: user.fullName },
     _config.JWT_SECRET,
     {
       expiresIn: "2d",
