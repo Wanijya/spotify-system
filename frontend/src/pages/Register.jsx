@@ -11,7 +11,7 @@ const Register = () => {
     firstName: "",
     lastName: "",
     password: "",
-    userType: "user",
+    role: "user",
   });
 
   const handleChange = (e) => {
@@ -31,7 +31,7 @@ const Register = () => {
             lastName: formData.lastName,
           },
           password: formData.password,
-          userType: formData.userType,
+          role: formData.role,
         },
         {
           withCredentials: true,
@@ -139,26 +139,26 @@ const Register = () => {
             <label>I am a</label>
             <div className="radio-group">
               <label
-                className={`radio-option ${formData.userType === "user" ? "active" : ""}`}
+                className={`radio-option ${formData.role === "user" ? "active" : ""}`}
               >
                 <input
                   type="radio"
-                  name="userType"
+                  name="role"
                   value="user"
-                  checked={formData.userType === "user"}
+                  checked={formData.role === "user"}
                   onChange={handleChange}
                 />
                 <span className="radio-dot"></span>
                 User
               </label>
               <label
-                className={`radio-option ${formData.userType === "artist" ? "active" : ""}`}
+                className={`radio-option ${formData.role === "artist" ? "active" : ""}`}
               >
                 <input
                   type="radio"
-                  name="userType"
+                  name="role"
                   value="artist"
-                  checked={formData.userType === "artist"}
+                  checked={formData.role === "artist"}
                   onChange={handleChange}
                 />
                 <span className="radio-dot"></span>

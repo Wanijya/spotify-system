@@ -73,6 +73,11 @@ export async function googleAuthCallback(req, res) {
       },
     );
     res.cookie("token", token);
+
+    if (isUserAlreadyExists.role === "artist") {
+      return res.redirect("http://localhost:5173/artist/dashboard");
+    }
+
     return res.redirect("http://localhost:5173");
   }
 
@@ -96,6 +101,7 @@ export async function googleAuthCallback(req, res) {
     },
   );
   res.cookie("token", token);
+
   res.redirect("http://localhost:5173");
 }
 
