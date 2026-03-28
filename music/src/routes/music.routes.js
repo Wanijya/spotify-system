@@ -31,6 +31,9 @@ router.get("/artist-musics", authMiddleware.authArtistMiddleware, musicControlle
 /* Create playlist (POST /api/music/playlist) */
 router.post("/playlist", authMiddleware.authArtistMiddleware, musicController.createPlaylist)
 
+/* Get artist playlist (GET /api/music/playlist/artist) */
+router.get("/playlist/artist", authMiddleware.authArtistMiddleware, musicController.getArtistPlaylist)
+
 /* Get playlist (GET /api/music/playlist) */
 router.get("/playlist", authMiddleware.authUserMiddleware, musicController.getPlaylist)
 
