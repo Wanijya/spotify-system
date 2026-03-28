@@ -24,8 +24,21 @@ const MusicPlayer = () => {
   const [volume, setVolume] = useState(1);
   const [speed, setSpeed] = useState(1);
 
-  // Fetch track details
+  // 1) Jab id change ho — purana audio band karo, naya track fetch karo
   useEffect(() => {
+    setLoading(true);
+    setError("");
+    setTrack(null);
+    setIsPlaying(false);
+    setCurrentTime(0);
+    setDuration(0);
+
+    const audio = audioRef.current;
+    if (audio) {
+      audio.pause();
+      audio.src = "";
+    }
+
     axios
       .get(`http://localhost:3001/api/music/get-details/${id}`, {
         withCredentials: true,
@@ -41,7 +54,21 @@ const MusicPlayer = () => {
       });
   }, [id]);
 
-  // Sync audio time
+  // 2) Track load hone pe auto-play karo
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || !track) return;
+
+    audio.src = track.musicUrl;
+    audio.volume = volume;
+    audio.playbackRate = speed;
+
+    audio.play()
+      .then(() => setIsPlaying(true))
+      .catch(() => setIsPlaying(false));
+  }, [track]);
+
+  // 3) Audio events — time update, duration, ended
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -61,7 +88,18 @@ const MusicPlayer = () => {
     };
   }, [track]);
 
-  // Play / Pause
+  // 4) Cleanup — component unmount pe audio band karo
+  useEffect(() => {
+    return () => {
+      const audio = audioRef.current;
+      if (audio) {
+        audio.pause();
+        audio.src = "";
+      }
+    };
+  }, []);
+
+  // Play / Pause toggle
   const togglePlay = () => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -124,8 +162,8 @@ const MusicPlayer = () => {
   return (
     <div className="music-player">
       <div className="music-player__card">
-        {/* Hidden audio element */}
-        <audio ref={audioRef} src={track.musicUrl} preload="metadata" />
+        {/* Audio element — src is set in useEffect */}
+        <audio ref={audioRef} preload="metadata" />
 
         {/* Cover Art */}
         <div className="music-player__cover-wrapper">
@@ -159,9 +197,8 @@ const MusicPlayer = () => {
           </div>
         </div>
 
-        {/* Controls: Skip Back, Play/Pause, Skip Forward */}
+        {/* Controls */}
         <div className="music-player__controls">
-          {/* Skip Back 10s */}
           <button
             className="music-player__btn music-player__btn--skip"
             onClick={() => skip(-10)}
@@ -172,7 +209,6 @@ const MusicPlayer = () => {
             </svg>
           </button>
 
-          {/* Play / Pause */}
           <button
             className="music-player__btn music-player__btn--play"
             onClick={togglePlay}
@@ -190,7 +226,6 @@ const MusicPlayer = () => {
             )}
           </button>
 
-          {/* Skip Forward 10s */}
           <button
             className="music-player__btn music-player__btn--skip"
             onClick={() => skip(10)}
@@ -204,7 +239,6 @@ const MusicPlayer = () => {
 
         {/* Volume & Speed */}
         <div className="music-player__extras">
-          {/* Volume */}
           <div className="music-player__slider-group">
             <svg viewBox="0 0 24 24">
               <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" />
@@ -220,7 +254,6 @@ const MusicPlayer = () => {
             />
           </div>
 
-          {/* Speed */}
           <div className="music-player__speed">
             <span className="music-player__speed-label">Speed</span>
             <select

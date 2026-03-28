@@ -3,7 +3,7 @@ import "./Home.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-const Home = () => {
+const Home = ({ socket }) => {
   // Determine greeting based on time of day
   const hour = new Date().getHours();
   let greeting = "Good evening";
@@ -40,8 +40,9 @@ const Home = () => {
   const [music, setMusic] = useState([]);
 
   useEffect(() => {
-    axios.get("http://localhost:3001/api/music/", { withCredentials: true })
-    .then((res) =>
+    axios
+      .get("http://localhost:3001/api/music/", { withCredentials: true })
+      .then((res) =>
         setMusic(
           res.data.musics.map((m) => {
             return {
@@ -54,17 +55,22 @@ const Home = () => {
           }),
         ),
       );
-    
-    axios.get("http://localhost:3001/api/music/playlist", {withCredentials: true})
-    .then((res)=>{
-      setPlaylists(res.data.playlists.map((p)=>{
-        return {
-          id: p._id,
-          title: p.title,
-          count: p.musics.length,
-        }
-      }))
-    })
+
+    axios
+      .get("http://localhost:3001/api/music/playlist", {
+        withCredentials: true,
+      })
+      .then((res) => {
+        setPlaylists(
+          res.data.playlists.map((p) => {
+            return {
+              id: p._id,
+              title: p.title,
+              count: p.musics.length,
+            };
+          }),
+        );
+      });
   }, []);
 
   return (
@@ -113,7 +119,14 @@ const Home = () => {
         </div>
         <div className="home__grid">
           {music.map((music) => (
-            <div className="home-card" key={`recent-${music.id}`} onClick={()=> navigate(`/music/${music.id}`)}>
+            <div
+              className="home-card"
+              key={`recent-${music.id}`}
+              onClick={() => {
+                socket?.emit("play", { musicId: music.id });
+                navigate(`/music/${music.id}`);
+              }}
+            >
               <div className="home-card__image-wrapper">
                 <img
                   src={music.coverImageUrl}

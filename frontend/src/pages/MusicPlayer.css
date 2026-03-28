@@ -13,6 +13,7 @@
 }
 
 .music-player__card {
+  position: relative;
   width: 100%;
   max-width: 480px;
   background: var(--bg-elevated);
@@ -263,6 +264,37 @@
 
 .music-player__speed-select:focus {
   border-color: var(--color-primary);
+}
+
+/* ── Autoplay Gesture Overlay ── */
+.music-player__gesture-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  cursor: pointer;
+  z-index: 10;
+  transition: opacity var(--transition-fast);
+}
+
+.music-player__gesture-overlay:hover {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.music-player__gesture-overlay span {
+  color: #fff;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-wide);
 }
 
 /* ── Loading / Error ── */
