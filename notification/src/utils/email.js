@@ -5,10 +5,11 @@ const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
     type: "OAuth2",
-    user: process.env.EMAIL_USER,
-    clientId: process.env.CLIENT_ID,
-    clientSecret: process.env.CLIENT_SECRET,
-    refreshToken: process.env.REFRESH_TOKEN,
+    user: config.EMAIL_USER,
+    clientId: config.CLIENT_ID,
+    clientSecret: config.CLIENT_SECRET,
+    refreshToken: config.REFRESH_TOKEN,
+    accessToken: config.ACCESS_TOKEN,
   },
 });
 
@@ -24,7 +25,7 @@ transporter.verify((error, success) => {
 const sendEmail = async (to, subject, text, html) => {
   try {
     const info = await transporter.sendMail({
-      from: `"Spotify System" <${process.env.EMAIL_USER}>`, // sender address
+      from: `"Spotify System" <${config.EMAIL_USER}>`, // sender address
       to, // list of receivers
       subject, // Subject line
       text, // plain text body

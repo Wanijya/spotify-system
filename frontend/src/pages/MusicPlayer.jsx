@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import "./MusicPlayer.css";
+import { socket } from "../socket";
 
 const formatTime = (seconds) => {
   if (isNaN(seconds)) return "0:00";
@@ -13,6 +14,24 @@ const formatTime = (seconds) => {
 const MusicPlayer = () => {
   const { id } = useParams();
   const audioRef = useRef(null);
+
+  // Helper to extract proper user ID
+  const getUserId = () => {
+    const cookies = document.cookie.split(";").map(c => c.trim());
+    const tokenCookie = cookies.find(c => c.startsWith("token="));
+    if (tokenCookie) {
+      try {
+        const token = tokenCookie.split("=")[1];
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        return payload.id;
+      } catch (e) {
+        return "test_user_123";
+      }
+    }
+    return "test_user_123";
+  };
+  
+  const userId = getUserId();
 
   const [track, setTrack] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -66,7 +85,7 @@ const MusicPlayer = () => {
     audio.play()
       .then(() => setIsPlaying(true))
       .catch(() => setIsPlaying(false));
-  }, [track]);
+  }, [track, volume, speed]);
 
   // 3) Audio events — time update, duration, ended
   useEffect(() => {
@@ -88,7 +107,43 @@ const MusicPlayer = () => {
     };
   }, [track]);
 
-  // 4) Cleanup — component unmount pe audio band karo
+  useEffect(() => {
+  if (!userId || !track) return;
+
+    // Connect and join room
+    socket.connect();
+    socket.emit("join_room", userId);
+
+    const handleSync = (data) => {
+      console.log("Received sync data:", data);
+      
+      const audio = audioRef.current;
+      // Sirf tabhi update karo jab id match ho (matlab dono device pe same gaana khula ho)
+      if (audio && data.songId === id) {
+        // Time match karo
+        audio.currentTime = data.currentTime;
+        setCurrentTime(data.currentTime);
+
+        // Play/Pause match karo
+        if (data.action === "PLAY") {
+          audio.play().catch(e => console.log("Play interrupted:", e));
+          setIsPlaying(true);
+        } else if (data.action === "PAUSE") {
+          audio.pause();
+          setIsPlaying(false);
+        }
+      }
+    };
+
+    socket.on("sync_playback", handleSync);
+
+    return () => {
+      socket.off("sync_playback", handleSync);
+      socket.disconnect();
+    };
+  }, [userId, track, id]);
+
+  // Cleanup: Component unmount pe audio band karo
   useEffect(() => {
     return () => {
       const audio = audioRef.current;
@@ -99,16 +154,33 @@ const MusicPlayer = () => {
     };
   }, []);
 
+  const emitSyncAction = (actionType, time) => {
+    if (socket.connected) {
+      socket.emit("send_sync_action", {
+        userId: userId,
+        songId: id,
+        action: actionType,
+        currentTime: time
+      });
+    }
+  };
+
+
   // Play / Pause toggle
   const togglePlay = () => {
     const audio = audioRef.current;
     if (!audio) return;
+
+    const newAction = isPlaying ? "PAUSE" : "PLAY";
+
     if (isPlaying) {
       audio.pause();
     } else {
       audio.play();
     }
     setIsPlaying(!isPlaying);
+
+    emitSyncAction(newAction, audio.currentTime);
   };
 
   // Seek
@@ -117,6 +189,8 @@ const MusicPlayer = () => {
     if (!audio) return;
     audio.currentTime = Number(e.target.value);
     setCurrentTime(audio.currentTime);
+
+    emitSyncAction(isPlaying ? "PLAY" : "PAUSE", newTime);
   };
 
   // Volume
@@ -141,6 +215,9 @@ const MusicPlayer = () => {
       Math.max(audio.currentTime + seconds, 0),
       duration,
     );
+
+    audio.currentTime = newTime;
+    emitSyncAction(isPlaying ? "PLAY" : "PAUSE", newTime);
   };
 
   if (loading) {

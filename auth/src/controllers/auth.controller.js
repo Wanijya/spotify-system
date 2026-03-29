@@ -34,14 +34,24 @@ export async function register(req, res) {
     },
   );
 
-  await publishToQueue("user_created", {
-    id: user._id,
-    email: user.email,
-    fullName: user.fullName,
-    role: user.role,
-  });
+  try {
+    await publishToQueue("user_created", {
+      id: user._id,
+      email: user.email,
+      fullName: user.fullName,
+      role: user.role,
+    });
+  } catch (err) {
+    console.error("Failed to publish to RabbitMQ (email won't send):", err.message);
+  }
 
-  res.cookie("token", token);
+  const cookieOptions = {
+    httpOnly: true,
+    sameSite: "lax",
+    maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days
+  };
+
+  res.cookie("token", token, cookieOptions);
   return res.status(201).json({
     message: "User created successfully",
     user: {
@@ -72,7 +82,11 @@ export async function googleAuthCallback(req, res) {
         expiresIn: "2d",
       },
     );
-    res.cookie("token", token);
+    res.cookie("token", token, {
+      httpOnly: true,
+      sameSite: "lax",
+      maxAge: 2 * 24 * 60 * 60 * 1000,
+    });
 
     if (isUserAlreadyExists.role === "artist") {
       return res.redirect("http://localhost:5173/artist/dashboard");
@@ -100,7 +114,11 @@ export async function googleAuthCallback(req, res) {
       expiresIn: "2d",
     },
   );
-  res.cookie("token", token);
+  res.cookie("token", token, {
+    httpOnly: true,
+    sameSite: "lax",
+    maxAge: 2 * 24 * 60 * 60 * 1000,
+  });
 
   res.redirect("http://localhost:5173");
 }
@@ -124,7 +142,11 @@ export async function login(req, res) {
       expiresIn: "2d",
     },
   );
-  res.cookie("token", token);
+  res.cookie("token", token, {
+    httpOnly: true,
+    sameSite: "lax",
+    maxAge: 2 * 24 * 60 * 60 * 1000,
+  });
   return res.status(200).json({
     message: "User logged in successfully",
     user: {

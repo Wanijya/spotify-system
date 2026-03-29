@@ -11,6 +11,9 @@ const _config = {
   ACCESS_TOKEN: process.env.ACCESS_TOKEN,
   EMAIL_USER: process.env.EMAIL_USER,
   RABBITMQ_URI: process.env.RABBITMQ_URI,
+  REDIS_HOST: process.env.REDIS_HOST,
+  REDIS_PORT: process.env.REDIS_PORT,
+  REDIS_PASSWORD: process.env.REDIS_PASSWORD,
 };
 
 export default Object.freeze(_config);
