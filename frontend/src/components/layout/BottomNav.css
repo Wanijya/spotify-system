@@ -1,0 +1,69 @@
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 70px;
+  background: rgba(18, 18, 18, 0.85); /* Premium dark translucent */
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 1000;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.bottom-nav .nav-item {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+  color: #b3b3b3;
+  width: 33%;
+  transition: color 0.3s ease;
+  position: relative;
+}
+
+.bottom-nav .nav-item:hover,
+.bottom-nav .nav-item:focus {
+  color: #fff;
+}
+
+.bottom-nav .nav-item svg {
+  margin-bottom: 4px;
+  transition: transform 0.2s ease;
+}
+
+.bottom-nav .nav-item span {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+/* Active State */
+.bottom-nav .nav-item.active {
+  color: #1ed760; /* Spotify Green */
+}
+
+.bottom-nav .nav-item.active svg {
+  transform: scale(1.1);
+}
+
+/* Ensure body has padding so content doesn't get hidden behind bottom nav */
+@media (max-width: 1024px) {
+  body {
+    padding-bottom: 70px;
+  }
+}
+
+@media (min-width: 1025px) {
+  .bottom-nav {
+    display: none; /* Hide on desktop if using a sidebar design later */
+  }
+  body {
+    padding-bottom: 0;
+  }
+}

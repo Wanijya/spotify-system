@@ -5,7 +5,24 @@ import * as authMiddleware from "../middlewares/auth.middleware.js";
 
 const upload = multer({
   storage: multer.memoryStorage(),
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB max
+  fileFilter: (req, file, cb) => {
+    if (file.fieldname === "music") {
+      const allowed = ["audio/mpeg", "audio/wav", "audio/flac", "audio/mp4"];
+      if (!allowed.includes(file.mimetype)) {
+        return cb(new Error("Only audio files allowed"), false);
+      }
+    }
+    if (file.fieldname === "coverImage") {
+      const allowed = ["image/jpeg", "image/png", "image/webp"];
+      if (!allowed.includes(file.mimetype)) {
+        return cb(new Error("Only image files allowed"), false);
+      }
+    }
+    cb(null, true);
+  },
 });
+
 const router = express.Router();
 
 /* Upload music (POST /api/music/upload) */
@@ -23,21 +40,45 @@ router.post(
 router.get("/", authMiddleware.authUserMiddleware, musicController.getAllMusic);
 
 /* Get music details (GET /api/music/get-details/:id) */
-router.get("/get-details/:id", authMiddleware.authUserMiddleware, musicController.getMusicById);
+router.get(
+  "/get-details/:id",
+  authMiddleware.authUserMiddleware,
+  musicController.getMusicById,
+);
 
 /* Get artist music (GET /api/music/artist-musics) */
-router.get("/artist-musics", authMiddleware.authArtistMiddleware, musicController.getArtistMusic);
+router.get(
+  "/artist-musics",
+  authMiddleware.authArtistMiddleware,
+  musicController.getArtistMusic,
+);
 
 /* Create playlist (POST /api/music/playlist) */
-router.post("/playlist", authMiddleware.authArtistMiddleware, musicController.createPlaylist)
+router.post(
+  "/playlist",
+  authMiddleware.authArtistMiddleware,
+  musicController.createPlaylist,
+);
 
 /* Get artist playlist (GET /api/music/playlist/artist) */
-router.get("/playlist/artist", authMiddleware.authArtistMiddleware, musicController.getArtistPlaylist)
+router.get(
+  "/playlist/artist",
+  authMiddleware.authArtistMiddleware,
+  musicController.getArtistPlaylist,
+);
 
 /* Get playlist (GET /api/music/playlist) */
-router.get("/playlist", authMiddleware.authUserMiddleware, musicController.getPlaylist)
+router.get(
+  "/playlist",
+  authMiddleware.authUserMiddleware,
+  musicController.getPlaylist,
+);
 
 /* Get specific playlist song (GET /api/music/playlist/:id) */
-router.get("/playlist/:id", authMiddleware.authUserMiddleware, musicController.getPlaylistById)
+router.get(
+  "/playlist/:id",
+  authMiddleware.authUserMiddleware,
+  musicController.getPlaylistById,
+);
 
 export default router;

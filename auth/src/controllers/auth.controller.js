@@ -27,21 +27,31 @@ export async function register(req, res) {
     role,
   });
   const token = jwt.sign(
-    { id: user._id, role: user.role, fullName: user.fullName },
+    { id: user._id, role: user.role, fullName: user.fullName, email: user.email },
     _config.JWT_SECRET,
     {
       expiresIn: "2d",
     },
   );
 
-  await publishToQueue("user_created", {
-    id: user._id,
-    email: user.email,
-    fullName: user.fullName,
-    role: user.role,
-  });
+  try {
+    await publishToQueue("user_created", {
+      id: user._id,
+      email: user.email,
+      fullName: user.fullName,
+      role: user.role,
+    });
+  } catch (err) {
+    console.error("Failed to publish to RabbitMQ (email won't send):", err.message);
+  }
 
-  res.cookie("token", token);
+  const cookieOptions = {
+    httpOnly: true,
+    sameSite: "lax",
+    maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days
+  };
+
+  res.cookie("token", token, cookieOptions);
   return res.status(201).json({
     message: "User created successfully",
     user: {
@@ -66,13 +76,18 @@ export async function googleAuthCallback(req, res) {
         id: isUserAlreadyExists._id,
         role: isUserAlreadyExists.role,
         fullName: isUserAlreadyExists.fullName,
+        email: isUserAlreadyExists.email,
       },
       _config.JWT_SECRET,
       {
         expiresIn: "2d",
       },
     );
-    res.cookie("token", token);
+    res.cookie("token", token, {
+      httpOnly: true,
+      sameSite: "lax",
+      maxAge: 2 * 24 * 60 * 60 * 1000,
+    });
 
     if (isUserAlreadyExists.role === "artist") {
       return res.redirect("http://localhost:5173/artist/dashboard");
@@ -94,13 +109,18 @@ export async function googleAuthCallback(req, res) {
       id: newUser._id,
       role: newUser.role,
       fullName: newUser.fullName,
+      email: newUser.email,
     },
     _config.JWT_SECRET,
     {
       expiresIn: "2d",
     },
   );
-  res.cookie("token", token);
+  res.cookie("token", token, {
+    httpOnly: true,
+    sameSite: "lax",
+    maxAge: 2 * 24 * 60 * 60 * 1000,
+  });
 
   res.redirect("http://localhost:5173");
 }
@@ -118,13 +138,17 @@ export async function login(req, res) {
     return res.status(400).json({ message: "Invalid email or password" });
   }
   const token = jwt.sign(
-    { id: user._id, role: user.role, fullName: user.fullName },
+    { id: user._id, role: user.role, fullName: user.fullName, email: user.email },
     _config.JWT_SECRET,
     {
       expiresIn: "2d",
     },
   );
-  res.cookie("token", token);
+  res.cookie("token", token, {
+    httpOnly: true,
+    sameSite: "lax",
+    maxAge: 2 * 24 * 60 * 60 * 1000,
+  });
   return res.status(200).json({
     message: "User logged in successfully",
     user: {
@@ -134,4 +158,16 @@ export async function login(req, res) {
       role: user.role,
     },
   });
+}
+
+export async function getProfile(req, res) {
+  if (req.user) {
+    return res.status(200).json({ user: req.user });
+  }
+  return res.status(401).json({ message: "Not authenticated" });
+}
+
+export async function logout(req, res) {
+  res.clearCookie("token");
+  return res.status(200).json({ message: "User logged out successfully" });
 }

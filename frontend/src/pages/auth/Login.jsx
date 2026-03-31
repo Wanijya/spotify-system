@@ -17,7 +17,7 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // console.log(formData);
+    console.log(formData);
     try {
       const res = await axios
         .post(

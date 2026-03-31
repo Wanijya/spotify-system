@@ -2,6 +2,8 @@ import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import "./MusicPlayer.css";
+import { socket } from "../../services/socket.service";
+import { useSync } from "../../context/SyncContext";
 
 const formatTime = (seconds) => {
   if (isNaN(seconds)) return "0:00";
@@ -13,6 +15,16 @@ const formatTime = (seconds) => {
 const MusicPlayer = () => {
   const { id } = useParams();
   const audioRef = useRef(null);
+
+  const [userId, setUserId] = useState(null);
+  const { syncEnabled } = useSync();
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:3000/api/auth/me", { withCredentials: true })
+      .then((res) => setUserId(res.data.user.id))
+      .catch((err) => console.log("Guest user playing music"));
+  }, []);
 
   const [track, setTrack] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -63,10 +75,11 @@ const MusicPlayer = () => {
     audio.volume = volume;
     audio.playbackRate = speed;
 
-    audio.play()
+    audio
+      .play()
       .then(() => setIsPlaying(true))
       .catch(() => setIsPlaying(false));
-  }, [track]);
+  }, [track, volume, speed]);
 
   // 3) Audio events — time update, duration, ended
   useEffect(() => {
@@ -88,7 +101,39 @@ const MusicPlayer = () => {
     };
   }, [track]);
 
-  // 4) Cleanup — component unmount pe audio band karo
+  // Ye poora useEffect replace karo (jo userId aur socket wala hai)
+  useEffect(() => {
+    // Guard: sirf tab run karo jab dono ho
+    if (!syncEnabled || !userId || !track) return;
+
+    const handleSync = (data) => {
+      const audio = audioRef.current;
+      if (!audio || data.songId !== id) return;
+
+      // Drift tolerance — 1.5 sec se kam difference ignore karo
+      // Ye important hai: bina iske audio har sync pe "jump" karega
+      if (Math.abs(audio.currentTime - data.currentTime) > 1.5) {
+        audio.currentTime = data.currentTime;
+        setCurrentTime(data.currentTime);
+      }
+
+      if (data.action === "PLAY") {
+        audio.play().catch((e) => console.log("Play blocked:", e));
+        setIsPlaying(true);
+      } else if (data.action === "PAUSE") {
+        audio.pause();
+        setIsPlaying(false);
+      }
+    };
+
+    socket.on("sync_playback", handleSync);
+
+    return () => {
+      socket.off("sync_playback", handleSync);
+    };
+  }, [syncEnabled, userId, track, id]);
+
+  // Cleanup: Component unmount pe audio band karo
   useEffect(() => {
     return () => {
       const audio = audioRef.current;
@@ -99,16 +144,32 @@ const MusicPlayer = () => {
     };
   }, []);
 
+  const emitSyncAction = (actionType, time) => {
+    // Sirf tab emit karo jab sync ON ho
+    if (!syncEnabled || !socket.connected) return;
+
+    socket.emit("send_sync_action", {
+      songId: id,
+      action: actionType,
+      currentTime: time,
+    });
+  };
+
   // Play / Pause toggle
   const togglePlay = () => {
     const audio = audioRef.current;
     if (!audio) return;
+
+    const newAction = isPlaying ? "PAUSE" : "PLAY";
+
     if (isPlaying) {
       audio.pause();
     } else {
       audio.play();
     }
     setIsPlaying(!isPlaying);
+
+    emitSyncAction(newAction, audio.currentTime);
   };
 
   // Seek
@@ -117,6 +178,8 @@ const MusicPlayer = () => {
     if (!audio) return;
     audio.currentTime = Number(e.target.value);
     setCurrentTime(audio.currentTime);
+
+    emitSyncAction(isPlaying ? "PLAY" : "PAUSE", newTime);
   };
 
   // Volume
@@ -141,6 +204,9 @@ const MusicPlayer = () => {
       Math.max(audio.currentTime + seconds, 0),
       duration,
     );
+
+    audio.currentTime = newTime;
+    emitSyncAction(isPlaying ? "PLAY" : "PAUSE", newTime);
   };
 
   if (loading) {
@@ -154,7 +220,9 @@ const MusicPlayer = () => {
   if (error || !track) {
     return (
       <div className="music-player">
-        <span className="music-player__error">{error || "Track not found"}</span>
+        <span className="music-player__error">
+          {error || "Track not found"}
+        </span>
       </div>
     );
   }

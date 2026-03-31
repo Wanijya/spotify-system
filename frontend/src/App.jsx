@@ -1,12 +1,14 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import ArtistDashboard from "./pages/ArtistDashboard";
-import UploadMusic from "./pages/UploadMusic";
-import MusicPlayer from "./pages/MusicPlayer";
-import Navbar from "./components/Navbar";
+import Home from "./pages/user/Home";
+import Login from "./pages/auth/Login";
+import Register from "./pages/auth/Register";
+import ArtistDashboard from "./pages/artist/ArtistDashboard";
+import UploadMusic from "./pages/artist/UploadMusic";
+import MusicPlayer from "./pages/user/MusicPlayer";
+import BottomNav from "./components/layout/BottomNav";
+import Playlists from "./pages/user/Playlists";
+import Settings from "./pages/user/Settings";
 import { io } from "socket.io-client";
 
 const App = () => {
@@ -20,7 +22,7 @@ const App = () => {
   }, [navigate]);
 
   useEffect(() => {
-    const newSocket = io("http://localhost:3001", {
+    const newSocket = io("http://localhost:3002", {
       withCredentials: true,
     });
     setSocket(newSocket);
@@ -37,7 +39,7 @@ const App = () => {
 
   return (
     <>
-      <Navbar />
+      <BottomNav />
       <Routes>
         <Route path="/" element={<Home socket={socket} />} />
         <Route path="/login" element={<Login />} />
@@ -48,6 +50,8 @@ const App = () => {
           element={<UploadMusic />}
         />
         <Route path="/music/:id" element={<MusicPlayer />} />
+        <Route path="/playlists" element={<Playlists />} />
+        <Route path="/settings" element={<Settings />} />
       </Routes>
     </>
   );
