@@ -12,7 +12,7 @@ const Settings = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/auth/me", {
+        const response = await axios.get(`${import.meta.env.VITE_AUTH_URL || 'http://localhost:3000'}/api/auth/me`, {
           withCredentials: true,
         });
         setUserProfile(response.data.user);

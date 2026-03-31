@@ -22,7 +22,7 @@ const App = () => {
   }, [navigate]);
 
   useEffect(() => {
-    const newSocket = io("http://localhost:3002", {
+    const newSocket = io(import.meta.env.VITE_NOTIFICATION_URL || "http://localhost:3002", {
       withCredentials: true,
     });
     setSocket(newSocket);

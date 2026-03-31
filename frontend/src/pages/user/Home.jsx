@@ -17,7 +17,7 @@ const Home = ({ socket }) => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:3001/api/music/", { withCredentials: true })
+      .get(`${import.meta.env.VITE_MUSIC_URL || 'http://localhost:3001'}/api/music/`, { withCredentials: true })
       .then((res) =>
         setMusic(
           res.data.musics.map((m) => {
@@ -33,7 +33,7 @@ const Home = ({ socket }) => {
       );
 
     axios
-      .get("http://localhost:3001/api/music/playlist", {
+      .get(`${import.meta.env.VITE_MUSIC_URL || 'http://localhost:3001'}/api/music/playlist`, {
         withCredentials: true,
       })
       .then((res) => {

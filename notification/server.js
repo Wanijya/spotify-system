@@ -4,6 +4,7 @@ import startListener from "./src/broker/listner.js";
 import http from "http";
 import { Server } from "socket.io";
 import { initializeSockets } from "./src/sockets/socket.server.js";
+import config from "./src/config/config.js";
 
 const httpServer = http.createServer(app);
 
@@ -11,7 +12,7 @@ connect().then(startListener);
 
 const io = new Server(httpServer, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: config.FRONTEND_URL || "http://localhost:5173",
     credentials: true,
   },
 });

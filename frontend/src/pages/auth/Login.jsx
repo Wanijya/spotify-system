@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import "./Login.css";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -21,7 +22,7 @@ const Login = () => {
     try {
       const res = await axios
         .post(
-          "http://localhost:3000/api/auth/login",
+          `${import.meta.env.VITE_AUTH_URL || 'http://localhost:3000'}/api/auth/login`,
           {
             email: formData.email,
             password: formData.password,
@@ -31,10 +32,15 @@ const Login = () => {
           },
         )
         .then((response) => {
-          console.log(response.data);
+          toast.success("Login successful!");
           navigate("/");
         });
     } catch (err) {
+      if (err.response && err.response.data && err.response.data.message) {
+        toast.error(err.response.data.message);
+      } else {
+        toast.error("An error occurred during login.");
+      }
       console.error("Error during login:", err);
     }
   };
@@ -54,7 +60,7 @@ const Login = () => {
         {/* Google Button */}
         <button
           onClick={() => {
-            window.location.href = "http://localhost:3000/api/auth/google";
+            window.location.href = `${import.meta.env.VITE_AUTH_URL || 'http://localhost:3000'}/api/auth/google`;
           }}
           type="button"
           className="login-google-btn"

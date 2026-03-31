@@ -21,7 +21,7 @@ const MusicPlayer = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:3000/api/auth/me", { withCredentials: true })
+      .get(`${import.meta.env.VITE_AUTH_URL || 'http://localhost:3000'}/api/auth/me`, { withCredentials: true })
       .then((res) => setUserId(res.data.user.id))
       .catch((err) => console.log("Guest user playing music"));
   }, []);
@@ -52,7 +52,7 @@ const MusicPlayer = () => {
     }
 
     axios
-      .get(`http://localhost:3001/api/music/get-details/${id}`, {
+      .get(`${import.meta.env.VITE_MUSIC_URL || 'http://localhost:3001'}/api/music/get-details/${id}`, {
         withCredentials: true,
       })
       .then((res) => {

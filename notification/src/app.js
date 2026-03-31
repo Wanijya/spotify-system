@@ -3,6 +3,7 @@ import sendEmail from "./utils/email.js";
 import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import config from "./config/config.js";
 
 const app = express();
 
@@ -15,7 +16,7 @@ app.use(rateLimit({
 }));
 
 app.use(cors({
-    origin: "http://localhost:5173",
+    origin: config.FRONTEND_URL || "http://localhost:5173",
     credentials: true
 }));
 

@@ -1,5 +1,6 @@
 import { subscribeToQueue } from "./rabbit.js";
 import sendEmail from "../utils/email.js";
+import config from "../config/config.js";
 
 function startListener() {
   subscribeToQueue("user_created", async (msg) => {
@@ -36,7 +37,7 @@ function startListener() {
 
                 <br>
 
-                <a href="http://localhost:5173" style="background-color: #1DB954; color: #000000; text-decoration: none; padding: 14px 32px; font-size: 16px; font-weight: bold; border-radius: 30px; display: inline-block; transition: transform 0.2s;">
+                <a href="${config.FRONTEND_URL || 'http://localhost:5173'}" style="background-color: #1DB954; color: #000000; text-decoration: none; padding: 14px 32px; font-size: 16px; font-weight: bold; border-radius: 30px; display: inline-block; transition: transform 0.2s;">
                   Start Listening Now
                 </a>
                 

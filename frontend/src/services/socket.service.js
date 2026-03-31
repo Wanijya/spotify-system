@@ -1,6 +1,6 @@
 import { io } from "socket.io-client";
 
-export const socket = io("http://localhost:3002", {
+export const socket = io(import.meta.env.VITE_NOTIFICATION_URL || "http://localhost:3002", {
   autoConnect: false,
   withCredentials: true,
   reconnection: true,
