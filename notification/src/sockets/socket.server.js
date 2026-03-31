@@ -1,34 +1,82 @@
-export const initializeSockets = (io) => {
-  io.on("connection", (socket) => {
-    console.log(`New client connected: ${socket.id}`);
+import jwt from "jsonwebtoken";
+import config from "../config/config.js";
+import redisClient from "../services/redis.service.js";
 
-    // User jab connect ho, usko uske personal room me join karwao
-    socket.on("join_room", (userId) => {
-      if (userId) {
-        const roomName = `room_user_${userId}`;
-        socket.join(roomName);
-        console.log(`Socket ${socket.id} joined ${roomName}`);
+export const initializeSockets = (io) => {
+
+  // ✅ Step 1 — Har connection pe JWT verify karo
+  io.use((socket, next) => {
+    try {
+      const cookieHeader = socket.handshake.headers.cookie || "";
+      const tokenCookie = cookieHeader
+        .split("; ")
+        .find((c) => c.startsWith("token="));
+
+      if (!tokenCookie) return next(new Error("Authentication failed"));
+
+      const token = tokenCookie.split("=")[1];
+      const decoded = jwt.verify(token, config.JWT_SECRET);
+      socket.userId = decoded.id; // server side se userId attach ho raha hai
+      next();
+    } catch (err) {
+      next(new Error("Authentication failed"));
+    }
+  });
+
+  io.on("connection", (socket) => {
+    console.log(`User ${socket.userId} connected — socket ${socket.id}`);
+
+    // ✅ Step 2 — Auto room join (client se userId nahi lena)
+    const roomName = `room_user_${socket.userId}`;
+    socket.join(roomName);
+
+    // ✅ Step 3 — YE NAYA HAI — Music service wala "play" event
+    // Jab ek device pe song click ho, doosre device pe bhi navigate karo
+    socket.on("play", (data) => {
+      socket.broadcast
+        .to(roomName)
+        .emit("play", { musicId: data.musicId });
+    });
+
+    // ✅ Step 4 — Sync toggle — Redis me store karo
+    socket.on("toggle_sync", async ({ enabled }) => {
+      try {
+        if (enabled) {
+          await redisClient.set(
+            `sync:${socket.userId}`,
+            "true",
+            "EX",
+            86400 // 24 ghante
+          );
+        } else {
+          await redisClient.del(`sync:${socket.userId}`);
+        }
+        socket.emit("sync_status", { enabled });
+        console.log(`Sync ${enabled ? "ON" : "OFF"} for user ${socket.userId}`);
+      } catch (err) {
+        console.error("Redis error in toggle_sync:", err);
       }
     });
 
-    // Frontend se direct sync action receive karo aur doosre tabs ko bhejo (Bina Redis ke)
-    socket.on("send_sync_action", (syncData) => {
-      const roomName = `room_user_${syncData.userId}`;
-      // socket.to() doosre devices (except sender) ko emit karta hai
-      socket.to(roomName).emit("sync_playback", syncData);
-    });
+    // ✅ Step 5 — Sync action — Redis check karo pehle
+    socket.on("send_sync_action", async (data) => {
+      try {
+        const isSyncOn = await redisClient.get(`sync:${socket.userId}`);
+        if (!isSyncOn) return; // sync off hai toh kuch mat karo
 
-    // User jab connect ho, usko uske personal room me join karwao
-    socket.on("join_room", (userId) => {
-      if (userId) {
-        const roomName = `room_user_${userId}`;
-        socket.join(roomName);
-        console.log(`Socket ${socket.id} joined ${roomName}`);
+        socket.to(roomName).emit("sync_playback", {
+          songId: data.songId,
+          action: data.action,
+          currentTime: data.currentTime,
+          // userId client se nahi aa raha — server se nikal rahe hain
+        });
+      } catch (err) {
+        console.error("Redis error in send_sync_action:", err);
       }
     });
 
     socket.on("disconnect", () => {
-      console.log(`Client disconnected: ${socket.id}`);
+      console.log(`User ${socket.userId} disconnected`);
     });
   });
 };

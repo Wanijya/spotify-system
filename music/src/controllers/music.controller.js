@@ -1,7 +1,11 @@
 import { uploadFile, getPresignedUrl } from "../services/storage.service.js";
 import musicModel from "../models/music.model.js";
 import playlistModel from "../models/playlist.model.js";
-import { getCache, setCache, invalidateCache } from "../services/redis.service.js";
+import {
+  getCache,
+  setCache,
+  invalidateCache,
+} from "../services/redis.service.js";
 
 export async function uploadMusic(req, res) {
   const musicFile = req.files["music"][0];
@@ -18,7 +22,7 @@ export async function uploadMusic(req, res) {
       musicKey,
       coverImageKey,
     });
-    
+
     // Invalidate artist's music cache so the new song shows up immediately
     await invalidateCache(`artist_music:${req.user.id}`);
 
@@ -44,7 +48,7 @@ export async function getMusicById(req, res) {
     }
     music.musicUrl = await getPresignedUrl(music.musicKey);
     music.coverImageUrl = await getPresignedUrl(music.coverImageKey);
-    
+
     await setCache(cacheKey, music, 600); // Cache for 10 minutes to respect presigned URL expiry
     return res.status(200).json({ music });
   } catch (err) {
@@ -61,13 +65,13 @@ export async function getArtistMusic(req, res) {
 
     const musicsDocs = await musicModel.find({ artistId: req.user.id }).lean();
 
-    let musics = [];
-
-    for (let music of musicsDocs) {
-      music.musicUrl = await getPresignedUrl(music.musicKey);
-      music.coverImageUrl = await getPresignedUrl(music.coverImageKey);
-      musics.push(music);
-    }
+    const musics = await Promise.all(
+      musicsDocs.map(async (music) => ({
+        ...music,
+        musicUrl: await getPresignedUrl(music.musicKey),
+        coverImageUrl: await getPresignedUrl(music.coverImageKey),
+      })),
+    );
 
     await setCache(cacheKey, musics, 600);
     return res.status(200).json({ musics });
@@ -121,15 +125,19 @@ export async function getAllMusic(req, res) {
   try {
     const cacheKey = `all_music:${skip}:${limit}`;
     const cachedData = await getCache(cacheKey);
-    if (cachedData) return res.status(200).json({ message: "Musics fetched successfully", musics: cachedData });
+    if (cachedData)
+      return res
+        .status(200)
+        .json({ message: "Musics fetched successfully", musics: cachedData });
 
     const musicDocs = await musicModel.find().skip(skip).limit(limit).lean();
-    const musics = [];
-    for (let music of musicDocs) {
-      music.musicUrl = await getPresignedUrl(music.musicKey);
-      music.coverImageUrl = await getPresignedUrl(music.coverImageKey);
-      musics.push(music);
-    }
+    const musics = await Promise.all(
+      musicDocs.map(async (music) => ({
+        ...music,
+        musicUrl: await getPresignedUrl(music.musicKey),
+        coverImageUrl: await getPresignedUrl(music.coverImageKey),
+      })),
+    );
     await setCache(cacheKey, musics, 600);
     return res
       .status(200)
@@ -151,15 +159,18 @@ export async function getPlaylistById(req, res) {
     if (!playlistDoc) {
       return res.status(404).json({ message: "Playlist not found." });
     }
-    const musics = [];
-    for (let musicId of playlistDoc.musics) {
-      const music = await musicModel.findById(musicId).lean();
-      if (music) {
-        music.musicUrl = await getPresignedUrl(music.musicKey);
-        music.coverImageUrl = await getPresignedUrl(music.coverImageKey);
-        musics.push(music);
-      }
-    }
+    const musicDocs = await musicModel
+      .find({ _id: { $in: playlistDoc.musics } })
+      .lean();
+
+    const musics = await Promise.all(
+      musicDocs.map(async (music) => ({
+        ...music,
+        musicUrl: await getPresignedUrl(music.musicKey),
+        coverImageUrl: await getPresignedUrl(music.coverImageKey),
+      })),
+    );
+
     playlistDoc.musics = musics;
 
     await setCache(cacheKey, playlistDoc, 600);

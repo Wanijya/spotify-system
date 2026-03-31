@@ -2,7 +2,8 @@ import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import "./MusicPlayer.css";
-import { socket } from "../socket";
+import { socket } from "../../services/socket.service";
+import { useSync } from "../../context/SyncContext";
 
 const formatTime = (seconds) => {
   if (isNaN(seconds)) return "0:00";
@@ -15,23 +16,15 @@ const MusicPlayer = () => {
   const { id } = useParams();
   const audioRef = useRef(null);
 
-  // Helper to extract proper user ID
-  const getUserId = () => {
-    const cookies = document.cookie.split(";").map(c => c.trim());
-    const tokenCookie = cookies.find(c => c.startsWith("token="));
-    if (tokenCookie) {
-      try {
-        const token = tokenCookie.split("=")[1];
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        return payload.id;
-      } catch (e) {
-        return "test_user_123";
-      }
-    }
-    return "test_user_123";
-  };
-  
-  const userId = getUserId();
+  const [userId, setUserId] = useState(null);
+  const { syncEnabled } = useSync();
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:3000/api/auth/me", { withCredentials: true })
+      .then((res) => setUserId(res.data.user.id))
+      .catch((err) => console.log("Guest user playing music"));
+  }, []);
 
   const [track, setTrack] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -82,7 +75,8 @@ const MusicPlayer = () => {
     audio.volume = volume;
     audio.playbackRate = speed;
 
-    audio.play()
+    audio
+      .play()
       .then(() => setIsPlaying(true))
       .catch(() => setIsPlaying(false));
   }, [track, volume, speed]);
@@ -107,31 +101,28 @@ const MusicPlayer = () => {
     };
   }, [track]);
 
+  // Ye poora useEffect replace karo (jo userId aur socket wala hai)
   useEffect(() => {
-  if (!userId || !track) return;
-
-    // Connect and join room
-    socket.connect();
-    socket.emit("join_room", userId);
+    // Guard: sirf tab run karo jab dono ho
+    if (!syncEnabled || !userId || !track) return;
 
     const handleSync = (data) => {
-      console.log("Received sync data:", data);
-      
       const audio = audioRef.current;
-      // Sirf tabhi update karo jab id match ho (matlab dono device pe same gaana khula ho)
-      if (audio && data.songId === id) {
-        // Time match karo
+      if (!audio || data.songId !== id) return;
+
+      // Drift tolerance — 1.5 sec se kam difference ignore karo
+      // Ye important hai: bina iske audio har sync pe "jump" karega
+      if (Math.abs(audio.currentTime - data.currentTime) > 1.5) {
         audio.currentTime = data.currentTime;
         setCurrentTime(data.currentTime);
+      }
 
-        // Play/Pause match karo
-        if (data.action === "PLAY") {
-          audio.play().catch(e => console.log("Play interrupted:", e));
-          setIsPlaying(true);
-        } else if (data.action === "PAUSE") {
-          audio.pause();
-          setIsPlaying(false);
-        }
+      if (data.action === "PLAY") {
+        audio.play().catch((e) => console.log("Play blocked:", e));
+        setIsPlaying(true);
+      } else if (data.action === "PAUSE") {
+        audio.pause();
+        setIsPlaying(false);
       }
     };
 
@@ -139,9 +130,8 @@ const MusicPlayer = () => {
 
     return () => {
       socket.off("sync_playback", handleSync);
-      socket.disconnect();
     };
-  }, [userId, track, id]);
+  }, [syncEnabled, userId, track, id]);
 
   // Cleanup: Component unmount pe audio band karo
   useEffect(() => {
@@ -155,16 +145,15 @@ const MusicPlayer = () => {
   }, []);
 
   const emitSyncAction = (actionType, time) => {
-    if (socket.connected) {
-      socket.emit("send_sync_action", {
-        userId: userId,
-        songId: id,
-        action: actionType,
-        currentTime: time
-      });
-    }
-  };
+    // Sirf tab emit karo jab sync ON ho
+    if (!syncEnabled || !socket.connected) return;
 
+    socket.emit("send_sync_action", {
+      songId: id,
+      action: actionType,
+      currentTime: time,
+    });
+  };
 
   // Play / Pause toggle
   const togglePlay = () => {
@@ -231,7 +220,9 @@ const MusicPlayer = () => {
   if (error || !track) {
     return (
       <div className="music-player">
-        <span className="music-player__error">{error || "Track not found"}</span>
+        <span className="music-player__error">
+          {error || "Track not found"}
+        </span>
       </div>
     );
   }

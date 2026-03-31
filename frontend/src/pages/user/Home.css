@@ -14,6 +14,9 @@
 
 .home__header {
   margin-bottom: var(--space-md);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .home__greeting {

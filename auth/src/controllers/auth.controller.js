@@ -27,7 +27,7 @@ export async function register(req, res) {
     role,
   });
   const token = jwt.sign(
-    { id: user._id, role: user.role, fullName: user.fullName },
+    { id: user._id, role: user.role, fullName: user.fullName, email: user.email },
     _config.JWT_SECRET,
     {
       expiresIn: "2d",
@@ -76,6 +76,7 @@ export async function googleAuthCallback(req, res) {
         id: isUserAlreadyExists._id,
         role: isUserAlreadyExists.role,
         fullName: isUserAlreadyExists.fullName,
+        email: isUserAlreadyExists.email,
       },
       _config.JWT_SECRET,
       {
@@ -108,6 +109,7 @@ export async function googleAuthCallback(req, res) {
       id: newUser._id,
       role: newUser.role,
       fullName: newUser.fullName,
+      email: newUser.email,
     },
     _config.JWT_SECRET,
     {
@@ -136,7 +138,7 @@ export async function login(req, res) {
     return res.status(400).json({ message: "Invalid email or password" });
   }
   const token = jwt.sign(
-    { id: user._id, role: user.role, fullName: user.fullName },
+    { id: user._id, role: user.role, fullName: user.fullName, email: user.email },
     _config.JWT_SECRET,
     {
       expiresIn: "2d",
@@ -156,4 +158,16 @@ export async function login(req, res) {
       role: user.role,
     },
   });
+}
+
+export async function getProfile(req, res) {
+  if (req.user) {
+    return res.status(200).json({ user: req.user });
+  }
+  return res.status(401).json({ message: "Not authenticated" });
+}
+
+export async function logout(req, res) {
+  res.clearCookie("token");
+  return res.status(200).json({ message: "User logged out successfully" });
 }

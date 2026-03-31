@@ -19,7 +19,7 @@ const playlistSchema = new mongoose.Schema({
       ref: "music",
     },
   ],
-});
+}, { timestamps: true });
 
 const playlist = mongoose.model("playlist", playlistSchema);
 

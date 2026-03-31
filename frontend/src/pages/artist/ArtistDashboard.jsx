@@ -10,25 +10,6 @@ const ArtistDashboard = () => {
   const [musics, setMusics] = useState([]);
   const [playlists, setPlaylists] = useState([]);
 
-  // Read artist name from JWT token cookie
-  const getArtistName = () => {
-    try {
-      const token = document.cookie
-        .split("; ")
-        .find((row) => row.startsWith("token="))
-        ?.split("=")[1];
-      if (token) {
-        const payload = JSON.parse(atob(token.split(".")[1]));
-        return `${payload.fullName.firstName} ${payload.fullName.lastName}`;
-      }
-    } catch (e) {
-      console.error("Error decoding token", e);
-    }
-    return "Artist Name";
-  };
-
-  const artistName = getArtistName();
-
   useEffect(() => {
     axios
       .get("http://localhost:3001/api/music/artist-musics", {
@@ -47,7 +28,6 @@ const ArtistDashboard = () => {
             };
           }),
         );
-        console.log(response.data);
       })
       .catch((error) => console.error("Error fetching musics", error));
 
@@ -74,7 +54,9 @@ const ArtistDashboard = () => {
           />
           <div className="dashboard-header__info">
             <span className="dashboard-header__label">Artist</span>
-            <h1 className="dashboard-header__title">{artistName}</h1>
+            {musics.length > 0 && (
+              <h1 className="dashboard-header__title">{musics[0].artist}</h1>
+            )}
             <span className="dashboard-header__stats">
               100,234,567 monthly listeners
             </span>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import "./Home.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import SyncButton from "../../components/layout/SyncButton";
 
 const Home = ({ socket }) => {
   // Determine greeting based on time of day
@@ -11,32 +12,7 @@ const Home = ({ socket }) => {
   else if (hour < 18) greeting = "Good afternoon";
 
   const navigate = useNavigate();
-  const [playlists, setPlaylists] = useState([
-    {
-      id: 1,
-      title: "Playlist 1",
-      coverImageUrl:
-        "https://images.unsplash.com/photo-1511379938547-c1f69419868d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-    },
-    {
-      id: 2,
-      title: "Playlist 2",
-      coverImageUrl:
-        "https://images.unsplash.com/photo-1511379938547-c1f69419868d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-    },
-    {
-      id: 3,
-      title: "Playlist 3",
-      coverImageUrl:
-        "https://images.unsplash.com/photo-1511379938547-c1f69419868d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-    },
-    {
-      id: 4,
-      title: "Playlist 4",
-      coverImageUrl:
-        "https://images.unsplash.com/photo-1511379938547-c1f69419868d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-    },
-  ]);
+  const [playlists, setPlaylists] = useState([]);
   const [music, setMusic] = useState([]);
 
   useEffect(() => {
@@ -77,6 +53,7 @@ const Home = ({ socket }) => {
     <div className="home">
       <header className="home__header">
         <h1 className="home__greeting">{greeting}</h1>
+        <SyncButton />
       </header>
 
       <section className="home__section">

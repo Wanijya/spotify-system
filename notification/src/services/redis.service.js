@@ -1,14 +1,18 @@
 import Redis from "ioredis";
 import config from "../config/config.js";
 
-const redisSubscriber = new Redis({
+const redisClient = new Redis({
   host: config.REDIS_HOST,
   port: config.REDIS_PORT,
   password: config.REDIS_PASSWORD,
 });
 
-redisSubscriber.on("connect", () => {
-  console.log("Redis Subscriber connected to Notification Service");
+redisClient.on("connect", () => {
+  console.log("Redis connected to Notification Service");
 });
 
-export default redisSubscriber;
+redisClient.on("error", (err) => {
+  console.error("Redis Error:", err.message);
+});
+
+export default redisClient;
