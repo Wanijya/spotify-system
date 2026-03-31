@@ -6,9 +6,18 @@ import passport from "passport";
 import {Strategy as GoogleStrategy} from "passport-google-oauth20";
 import _config from "./config/config.js";
 import cors from "cors";
-
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 
 const app = express();
+
+// Security middleware
+app.use(helmet());
+app.use(rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: { error: "Too many requests, please try again later" }
+}));
 
 app.use(cors({
   origin: "http://localhost:5173",
