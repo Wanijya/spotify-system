@@ -12,7 +12,7 @@ const ArtistDashboard = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:3001/api/music/artist-musics", {
+      .get(`${import.meta.env.VITE_MUSIC_URL || 'http://localhost:3001'}/api/music/artist-musics`, {
         withCredentials: true,
       })
       .then((response) => {
@@ -32,7 +32,7 @@ const ArtistDashboard = () => {
       .catch((error) => console.error("Error fetching musics", error));
 
     axios
-      .get("http://localhost:3001/api/music/playlist/artist", {
+      .get(`${import.meta.env.VITE_MUSIC_URL || 'http://localhost:3001'}/api/music/playlist/artist`, {
         withCredentials: true,
       })
       .then((response) => {

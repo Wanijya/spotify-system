@@ -10,7 +10,7 @@ export const SyncProvider = ({ children }) => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:3000/api/auth/me", {
+      .get(`${import.meta.env.VITE_AUTH_URL || 'http://localhost:3000'}/api/auth/me`, {
         withCredentials: true,
       })
       .then((res) => setUser(res.data.user))
@@ -45,7 +45,7 @@ export const SyncProvider = ({ children }) => {
       setSyncEnabled(false);
     }
     await axios.post(
-      "http://localhost:3000/api/auth/logout",
+      `${import.meta.env.VITE_AUTH_URL || 'http://localhost:3000'}/api/auth/logout`,
       {},
       { withCredentials: true }
     );

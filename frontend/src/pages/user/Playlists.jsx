@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import axios from "axios";
 import "./Playlists.css";
 
@@ -9,11 +10,12 @@ const Playlists = () => {
   useEffect(() => {
     const fetchPlaylists = async () => {
       try {
-        const response = await axios.get("http://localhost:3001/api/music/playlist", {
+        const response = await axios.get(`${import.meta.env.VITE_MUSIC_URL || 'http://localhost:3001'}/api/music/playlist`, {
           withCredentials: true,
         });
         setPlaylists(response.data.playlists || []);
       } catch (err) {
+        toast.error("Error fetching playlists");
         console.error("Error fetching playlists", err);
       } finally {
         setLoading(false);

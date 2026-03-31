@@ -48,7 +48,7 @@ const UploadMusic = () => {
     setStatus({ type: "", message: "" });
 
     try {
-      await axios.post("http://localhost:3001/api/music/upload", formData, {
+      await axios.post(`${import.meta.env.VITE_MUSIC_URL || 'http://localhost:3001'}/api/music/upload`, formData, {
         withCredentials: true,
         headers: { "Content-Type": "multipart/form-data" },
       });

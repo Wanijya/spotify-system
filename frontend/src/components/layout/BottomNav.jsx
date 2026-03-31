@@ -1,21 +1,27 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useSync } from "../../context/SyncContext";
 import "./BottomNav.css";
 
 const BottomNav = () => {
   const location = useLocation();
   const currentPath = location.pathname;
+  const { user } = useSync();
 
   // Don't show bottom nav on auth screens
   if (currentPath === "/login" || currentPath === "/register") {
     return null;
   }
 
-  const isActive = (path) => currentPath === path || currentPath.startsWith(path + "/");
+  const isActive = (path) =>
+    currentPath === path || currentPath.startsWith(path + "/");
 
   return (
     <div className="bottom-nav">
-      <Link to="/" className={`nav-item ${isActive("/") && currentPath === "/" ? "active" : ""}`}>
+      <Link
+        to="/"
+        className={`nav-item ${isActive("/") && currentPath === "/" ? "active" : ""}`}
+      >
         <svg
           xmlns="http://www.w3.org/Dom/svg"
           width="24"
@@ -33,7 +39,10 @@ const BottomNav = () => {
         <span>Home</span>
       </Link>
 
-      <Link to="/playlists" className={`nav-item ${isActive("/playlists") ? "active" : ""}`}>
+      <Link
+        to="/playlists"
+        className={`nav-item ${isActive("/playlists") ? "active" : ""}`}
+      >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="24"
@@ -53,7 +62,35 @@ const BottomNav = () => {
         <span>Playlist</span>
       </Link>
 
-      <Link to="/settings" className={`nav-item ${isActive("/settings") ? "active" : ""}`}>
+      {user?.role === "artist" && (
+        <Link
+          to="/artist/dashboard"
+          className={`nav-item ${isActive("/artist/dashboard") ? "active" : ""}`}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill={isActive("/artist/dashboard") ? "currentColor" : "none"}
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <rect x="3" y="3" width="7" height="9"></rect>
+            <rect x="14" y="3" width="7" height="5"></rect>
+            <rect x="14" y="12" width="7" height="9"></rect>
+            <rect x="3" y="16" width="7" height="5"></rect>
+          </svg>
+          <span>Artist</span>
+        </Link>
+      )}
+
+      <Link
+        to="/settings"
+        className={`nav-item ${isActive("/settings") ? "active" : ""}`}
+      >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="24"

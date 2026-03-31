@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import "./Register.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -23,7 +24,7 @@ const Register = () => {
     // console.log(formData);
     try {
       await axios.post(
-        "http://localhost:3000/api/auth/register",
+        `${import.meta.env.VITE_AUTH_URL || 'http://localhost:3000'}/api/auth/register`,
         {
           email: formData.email,
           fullName: {
@@ -37,8 +38,14 @@ const Register = () => {
           withCredentials: true,
         },
       );
+      toast.success("Registration Successful!");
       navigate("/");
     } catch (err) {
+      if (err.response && err.response.data && err.response.data.message) {
+        toast.error(err.response.data.message);
+      } else {
+        toast.error("Registration failed. Please try again.");
+      }
       console.error("Error during registration", err);
     }
   };
@@ -57,7 +64,7 @@ const Register = () => {
 
         {/* Google Button */}
         <button onClick={() => {
-          window.location.href = "http://localhost:3000/api/auth/google";
+          window.location.href = `${import.meta.env.VITE_AUTH_URL || 'http://localhost:3000'}/api/auth/google`;
         }} type="button" className="google-btn">
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path

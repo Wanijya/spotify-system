@@ -90,10 +90,12 @@ export async function googleAuthCallback(req, res) {
     });
 
     if (isUserAlreadyExists.role === "artist") {
-      return res.redirect("http://localhost:5173/artist/dashboard");
+      const frontendUrl = _config.FRONTEND_URL || "http://localhost:5173";
+      return res.redirect(`${frontendUrl}/artist/dashboard`);
     }
 
-    return res.redirect("http://localhost:5173");
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    return res.redirect(`${frontendUrl}`);
   }
 
   const newUser = await userModel.create({
@@ -122,7 +124,8 @@ export async function googleAuthCallback(req, res) {
     maxAge: 2 * 24 * 60 * 60 * 1000,
   });
 
-  res.redirect("http://localhost:5173");
+  const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+  res.redirect(`${frontendUrl}`);
 }
 
 export async function login(req, res) {
