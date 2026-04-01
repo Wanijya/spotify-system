@@ -16,9 +16,14 @@ const Login = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const validateEmail = (email) => {
+    const emailFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailFormat.test(email);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
+    // console.log(formData);
     try {
       const res = await axios
         .post(
@@ -41,7 +46,7 @@ const Login = () => {
       } else {
         toast.error("An error occurred during login.");
       }
-      console.error("Error during login:", err);
+      // console.error("Error during login:", err);
     }
   };
 
@@ -98,9 +103,14 @@ const Login = () => {
               type="email"
               id="login-email"
               name="email"
-              placeholder="name@example.com"
+              placeholder="Enter your email"
               value={formData.email}
               onChange={handleChange}
+              onBlur={() => {
+                if (!validateEmail(formData.email)) {
+                  toast.error("Please enter a valid email address");
+                }
+              }}
             />
           </div>
 
