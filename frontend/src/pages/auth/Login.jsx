@@ -5,8 +5,11 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
 
+import { useSync } from "../../context/SyncContext";
+
 const Login = () => {
   const navigate = useNavigate();
+  const { setUser } = useSync();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -25,21 +28,20 @@ const Login = () => {
     e.preventDefault();
     // console.log(formData);
     try {
-      const res = await axios
-        .post(
-          `${import.meta.env.VITE_AUTH_URL || 'http://localhost:3000'}/api/auth/login`,
-          {
-            email: formData.email,
-            password: formData.password,
-          },
-          {
-            withCredentials: true,
-          },
-        )
-        .then((response) => {
-          toast.success("Login successful!");
-          navigate("/");
-        });
+      const response = await axios.post(
+        `${import.meta.env.VITE_AUTH_URL || 'http://localhost:3000'}/api/auth/login`,
+        {
+          email: formData.email,
+          password: formData.password,
+        },
+        {
+          withCredentials: true,
+        },
+      );
+      // Update the user in SyncContext so the app reacts immediately
+      setUser(response.data.user);
+      toast.success("Login successful!");
+      navigate("/");
     } catch (err) {
       if (err.response && err.response.data && err.response.data.message) {
         toast.error(err.response.data.message);
@@ -124,6 +126,10 @@ const Login = () => {
               value={formData.password}
               onChange={handleChange}
             />
+          </div>
+
+          <div className="form-group">
+            <Link to="/forgot-password">Forgot your password?</Link>
           </div>
 
           <button type="submit" className="login-submit">

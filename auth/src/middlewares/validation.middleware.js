@@ -1,4 +1,4 @@
-import { body, validationResult } from "express-validator";
+import { body, param, validationResult } from "express-validator";
 
 async function validate(req, res, next) {
   const errors = validationResult(req);
@@ -22,5 +22,20 @@ export const loginUserValidationRules = [
   body("password")
     .isLength({ min: 6 })
     .withMessage("Password must be at least 6 characters"),
+  validate,
+]
+
+export const forgotPasswordValidationRules = [
+  body("email").isEmail().withMessage("Invalid email"),
+  validate,
+]
+
+export const resetPasswordValidationRules = [
+  param("token").notEmpty().withMessage("Token is required"),
+  body("password")
+    .isLength({ min: 6 })
+    .withMessage("Password must be at least 6 characters")
+    .matches(/\d/)
+    .withMessage("Password must contain at least one number"),
   validate,
 ]

@@ -23,6 +23,14 @@ const userSchema = new mongoose.Schema(
       enum: ["user", "artist"],
       default: "user",
     },
+    resetToken: {
+      type: String,
+      default: null,
+    },
+    resetTokenExpiry: {
+      type: Date,
+      default: null,
+    },
   },
   { timestamps: true },
 );

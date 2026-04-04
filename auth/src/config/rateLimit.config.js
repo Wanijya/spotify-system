@@ -47,6 +47,19 @@ export const rateLimitConfig = {
     windowMs: 15 * 60 * 1000,
     maxRequests: 10,
     message: "Too many logout requests"
+  },
+
+  // Password reset endpoints - STRICT limits to prevent abuse & email enumeration
+  forgotPassword: {
+    windowMs: 15 * 60 * 1000,   // 15 minutes
+    maxRequests: 3,              // 3 requests per window (prevents email spam)
+    message: "Too many password reset requests, please try again after 15 minutes"
+  },
+
+  resetPassword: {
+    windowMs: 15 * 60 * 1000,   // 15 minutes
+    maxRequests: 5,              // 5 attempts per window (moderate for token validation)
+    message: "Too many password reset attempts, please try again after 15 minutes"
   }
 };
 

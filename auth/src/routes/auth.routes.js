@@ -15,6 +15,8 @@ const registerLimiter = rateLimit(createLimiter(rateLimitConfig.register));
 const googleOAuthLimiter = rateLimit(createLimiter(rateLimitConfig.googleOAuth));
 const profileLimiter = rateLimit(createLimiter(rateLimitConfig.profile));
 const logoutLimiter = rateLimit(createLimiter(rateLimitConfig.logout));
+const forgotPasswordLimiter = rateLimit(createLimiter(rateLimitConfig.forgotPassword));
+const resetPasswordLimiter = rateLimit(createLimiter(rateLimitConfig.resetPassword));
 
 router.post(
   "/register",
@@ -46,5 +48,9 @@ router.get(
 router.get("/me", profileLimiter, authUserMiddleware, authController.getProfile);
 
 router.post("/logout", logoutLimiter, authUserMiddleware, authController.logout);
+
+router.post("/forgot-password", forgotPasswordLimiter, validationRules.forgotPasswordValidationRules, authController.forgotPassword);
+
+router.post("/reset-password/:token", resetPasswordLimiter, validationRules.resetPasswordValidationRules, authController.resetPassword);
 
 export default router;

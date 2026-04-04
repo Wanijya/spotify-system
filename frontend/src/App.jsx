@@ -10,6 +10,10 @@ import BottomNav from "./components/layout/BottomNav";
 import Playlists from "./pages/user/Playlists";
 import Settings from "./pages/user/Settings";
 import { io } from "socket.io-client";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import ResetPassword from "./pages/auth/ResetPassword";
+
+import AuthOverlay from "./components/layout/AuthOverlay";
 
 const App = () => {
   const [socket, setSocket] = useState(null);
@@ -22,9 +26,12 @@ const App = () => {
   }, [navigate]);
 
   useEffect(() => {
-    const newSocket = io(import.meta.env.VITE_NOTIFICATION_URL || "http://localhost:3002", {
-      withCredentials: true,
-    });
+    const newSocket = io(
+      import.meta.env.VITE_NOTIFICATION_URL || "http://localhost:3002",
+      {
+        withCredentials: true,
+      },
+    );
     setSocket(newSocket);
 
     newSocket.on("play", (data) => {
@@ -39,6 +46,7 @@ const App = () => {
 
   return (
     <>
+      <AuthOverlay />
       <BottomNav />
       <Routes>
         <Route path="/" element={<Home socket={socket} />} />
@@ -52,6 +60,8 @@ const App = () => {
         <Route path="/music/:id" element={<MusicPlayer />} />
         <Route path="/playlists" element={<Playlists />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
       </Routes>
     </>
   );
