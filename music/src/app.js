@@ -5,17 +5,20 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import { rateLimitConfig, createLimiter } from "./config/rateLimit.config.js";
+import { rateLimitMonitor } from "./middleware/rateLimitMonitor.js";
 import config from "./config/config.js";
 
 const app = express();
 
 // Security middleware
 app.use(helmet());
-app.use(rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  message: { error: "Too many requests, please try again later" }
-}));
+
+// Global fallback rate limit (applied first, then overridden by specific routes)
+app.use(rateLimit(createLimiter(rateLimitConfig.global)));
+
+// Monitor rate limit hits
+app.use(rateLimitMonitor);
 
 app.use(express.json());
 app.use(cookieParser());

@@ -37,7 +37,7 @@ function startListener() {
 
                 <br>
 
-                <a href="${config.FRONTEND_URL || 'http://localhost:5173'}" style="background-color: #1DB954; color: #000000; text-decoration: none; padding: 14px 32px; font-size: 16px; font-weight: bold; border-radius: 30px; display: inline-block; transition: transform 0.2s;">
+                <a href="${config.FRONTEND_URL || "http://localhost:5173"}" style="background-color: #1DB954; color: #000000; text-decoration: none; padding: 14px 32px; font-size: 16px; font-weight: bold; border-radius: 30px; display: inline-block; transition: transform 0.2s;">
                   Start Listening Now
                 </a>
                 
@@ -66,13 +66,61 @@ function startListener() {
         email,
         "Welcome to Spotify System! 🎧", // Subject with an emoji looks cool
         plainText,
-        htmlTemplate
+        htmlTemplate,
       );
 
       console.log(`Welcome email successfully triggered for ${email}`);
-      
     } catch (error) {
       console.error("Error processing user_created message:", error);
+    }
+  });
+
+  subscribeToQueue("password_reset", async (msg) => {
+    try {
+      const { email, fullName, resetToken, resetLink } = msg;
+
+      const htmlTemplate = `
+        <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color:        
+  #121212; color: #ffffff; padding: 40px 20px; text-align: center;">
+          <table style="max-width: 600px; margin: 0 auto; background-color: #181818; border-radius: 10px; 
+  overflow: hidden; border: 1px solid #282828;" width="100%">
+            <tr>
+              <td style="padding: 40px 30px; text-align: center;">
+                <h1 style="color: #1DB954; font-size: 28px;">Spotify System</h1>
+                <h2 style="color: #ffffff; font-size: 22px;">Password Reset Request 🔐</h2>
+                <p style="color: #b3b3b3; font-size: 16px;">Hi ${fullName},</p>
+                <p style="color: #b3b3b3; font-size: 16px;">You requested to reset your password. Click   
+  the button below to proceed:</p>
+
+                <a href="${resetLink}" style="background-color: #1DB954; color: #000000; text-decoration: 
+  none; padding: 14px 32px; font-size: 16px; font-weight: bold; border-radius: 30px; display:
+  inline-block; margin: 20px 0;">
+                  Reset Password
+                </a>
+
+                <p style="color: #b3b3b3; font-size: 14px;">Or copy this link:</p>
+                <p style="color: #1DB954; font-size: 14px; word-break: break-all;">${resetLink}</p>       
+
+                <p style="color: #535353; font-size: 12px; margin-top: 30px;">This link expires in 1      
+  hour.</p>
+                <p style="color: #535353; font-size: 12px;">If you didn't request this, you can safely    
+  ignore this email.</p>
+              </td>
+            </tr>
+          </table>
+        </div>
+      `;
+
+      await sendEmail(
+        email,
+        "Password Reset Request 🔐",
+        "You requested to reset your password. Click the link to proceed.",
+        htmlTemplate,
+      );
+
+      console.log(`Password reset email sent to ${email}`);
+    } catch (error) {
+      console.error("Error processing password_reset message:", error);
     }
   });
 }

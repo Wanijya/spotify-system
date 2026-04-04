@@ -1,0 +1,222 @@
+/* ============================================
+   AUTH OVERLAY — Login Required Modal
+   ============================================ */
+
+/* ── Backdrop ── */
+.auth-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal-backdrop);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  animation: authOverlayFadeIn 0.4s ease forwards;
+}
+
+@keyframes authOverlayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ── Modal Card ── */
+.auth-overlay__card {
+  position: relative;
+  z-index: var(--z-modal);
+  width: 90%;
+  max-width: 420px;
+  padding: var(--space-2xl) var(--space-xl);
+  background: linear-gradient(
+    145deg,
+    rgba(30, 30, 30, 0.95) 0%,
+    rgba(18, 18, 18, 0.98) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-xl);
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.6),
+    0 0 60px rgba(29, 185, 84, 0.08);
+  text-align: center;
+  animation: authCardSlideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes authCardSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ── Glow Ring behind the icon ── */
+.auth-overlay__icon-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  margin-bottom: var(--space-lg);
+  border-radius: var(--radius-full);
+  background: var(--color-primary-muted);
+  box-shadow: 0 0 30px rgba(29, 185, 84, 0.25);
+  animation: authPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes authPulse {
+  0%, 100% {
+    box-shadow: 0 0 30px rgba(29, 185, 84, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 50px rgba(29, 185, 84, 0.4);
+  }
+}
+
+.auth-overlay__icon {
+  width: 40px;
+  height: 40px;
+  fill: var(--color-primary);
+}
+
+/* ── Typography ── */
+.auth-overlay__title {
+  margin: 0 0 var(--space-sm);
+  font-family: var(--font-family);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  letter-spacing: var(--letter-spacing-tight);
+  line-height: var(--line-height-tight);
+}
+
+.auth-overlay__message {
+  margin: 0 0 var(--space-xl);
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-regular);
+  color: var(--text-secondary);
+  line-height: var(--line-height-normal);
+}
+
+/* ── CTA Button ── */
+.auth-overlay__login-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  width: 100%;
+  padding: 14px 28px;
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color: #000;
+  background: var(--color-primary);
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  text-decoration: none;
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  transition:
+    background var(--transition-fast),
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.auth-overlay__login-btn:hover {
+  background: var(--color-primary-hover);
+  transform: scale(1.03);
+  box-shadow: 0 8px 30px rgba(29, 185, 84, 0.35);
+}
+
+.auth-overlay__login-btn:active {
+  background: var(--color-primary-active);
+  transform: scale(0.98);
+}
+
+.auth-overlay__login-btn svg {
+  width: 20px;
+  height: 20px;
+  fill: #000;
+}
+
+/* ── Register Link ── */
+.auth-overlay__register {
+  margin-top: var(--space-lg);
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+.auth-overlay__register a {
+  color: var(--text-link);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+  transition: color var(--transition-fast);
+}
+
+.auth-overlay__register a:hover {
+  color: var(--text-link-hover);
+  text-decoration: underline;
+}
+
+/* ── Decorative Music Notes (floating animation) ── */
+.auth-overlay__notes {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+}
+
+.auth-overlay__note {
+  position: absolute;
+  font-size: 1.2rem;
+  opacity: 0.08;
+  animation: floatNote 6s ease-in-out infinite;
+}
+
+.auth-overlay__note:nth-child(1) {
+  top: 12%;
+  left: 8%;
+  animation-delay: 0s;
+}
+
+.auth-overlay__note:nth-child(2) {
+  top: 20%;
+  right: 10%;
+  animation-delay: 1.5s;
+  font-size: 1.5rem;
+}
+
+.auth-overlay__note:nth-child(3) {
+  bottom: 18%;
+  left: 15%;
+  animation-delay: 3s;
+  font-size: 0.9rem;
+}
+
+.auth-overlay__note:nth-child(4) {
+  bottom: 25%;
+  right: 12%;
+  animation-delay: 4.2s;
+}
+
+@keyframes floatNote {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0.08;
+  }
+  50% {
+    transform: translateY(-12px) rotate(10deg);
+    opacity: 0.15;
+  }
+}

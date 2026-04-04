@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./Settings.css";
 import { useSync } from "../../context/SyncContext";
+import { toast } from "react-toastify";
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -26,6 +27,7 @@ const Settings = () => {
 
   const handleLogout = async () => {
     await logout();
+    toast.success("Logged out successfully!");
     navigate("/login");
   };
 

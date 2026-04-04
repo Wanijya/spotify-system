@@ -2,6 +2,7 @@ import React, { useState, useRef } from "react";
 import axios from "axios";
 import "./UploadMusic.css";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const UploadMusic = () => {
   const navigate = useNavigate();
@@ -35,7 +36,7 @@ const UploadMusic = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!title.trim() || !musicFile || !coverImage) {
-      setStatus({ type: "error", message: "Please fill all fields." });
+      toast.error("Please fill all fields.");
       return;
     }
 
@@ -53,6 +54,7 @@ const UploadMusic = () => {
         headers: { "Content-Type": "multipart/form-data" },
       });
       setStatus({ type: "success", message: "Music uploaded successfully!" });
+      toast.success("Music uploaded successfully!");
       // Reset form
       setTitle("");
       setMusicFile(null);
@@ -68,6 +70,7 @@ const UploadMusic = () => {
         type: "error",
         message: error.response?.data?.message || "Upload failed. Try again.",
       });
+      toast.error("Upload failed. Try again.");
     } finally {
       setUploading(false);
     }

@@ -11,7 +11,7 @@ createRoot(document.getElementById("root")).render(
   <BrowserRouter>
     <SyncProvider>
       <App />
-      <ToastContainer position="bottom-right" autoClose={3000} theme="dark" />
+      <ToastContainer position="top-right" autoClose={3000} theme="dark" />
     </SyncProvider>
   </BrowserRouter>,
 );

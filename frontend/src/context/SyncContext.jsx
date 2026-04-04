@@ -7,6 +7,7 @@ const SyncContext = createContext();
 export const SyncProvider = ({ children }) => {
   const [syncEnabled, setSyncEnabled] = useState(false);
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     axios
@@ -14,7 +15,8 @@ export const SyncProvider = ({ children }) => {
         withCredentials: true,
       })
       .then((res) => setUser(res.data.user))
-      .catch(() => setUser(null));
+      .catch(() => setUser(null))
+      .finally(() => setLoading(false));
   }, []);
 
   const toggleSync = useCallback(() => {
@@ -53,7 +55,7 @@ export const SyncProvider = ({ children }) => {
   }, [syncEnabled]);
 
   return (
-    <SyncContext.Provider value={{ syncEnabled, toggleSync, user, setUser, logout }}>
+    <SyncContext.Provider value={{ syncEnabled, toggleSync, user, setUser, loading, logout }}>
       {children}
     </SyncContext.Provider>
   );
